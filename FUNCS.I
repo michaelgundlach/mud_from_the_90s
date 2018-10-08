@@ -73,6 +73,7 @@ function close_up_shop:boolean;
     close_up_shop:=TRUE;
     reset(roomf);
     close(roomf);
+    close(itemf);
     normvideo;
     clrscr;
     writeln;
@@ -84,23 +85,16 @@ function loc_of_room(x:string):integer;
   {searches room.dat, starting with 1, until it
    finds x, and returns proper location in file}
   var r:room;
-      roomf:roomfile;
   begin
-  if not OpenR(roomf) then begin
-    writeln('Room.dat not found!');
-    halt;
-    end;
   seek(roomf,0);
   while not eof(roomf) do begin
     read(roomf,r);
     if r.name=x then begin
       loc_of_room:=filepos(roomf)-1;
-      close(roomf);
       exit;
       end;
     end;
   writeln('Room not found!');
-  close(roomf);
 end; {numof}
 
 function loc_of_item(x:string):integer;
@@ -136,15 +130,10 @@ end;
 
 function room_has_item(roomname,itemname:string):string;
   {If room holds item, what is the item's id?}
-  var roomf:roomfile;
-      r:room;i1:item;
+  var r:room;i1:item;
       i,j:integer; s:string;
   begin
   room_has_item:='-1';
-  if not OpenR(roomf) then begin
-    writeln('Room.dat not found!');
-    halt;
-    end;
   seek(roomf,0);
   repeat read(roomf, r) until (r.name=roomname) or (eof(roomf));
   if (eof(roomf)) and (r.name<>roomname) then exit;
@@ -155,5 +144,4 @@ function room_has_item(roomname,itemname:string):string;
     read(itemf,i1);
     if i1.word=itemname then room_has_item:=pad_with_0s(i1.id);
     end;
-  close(roomf);
 end;

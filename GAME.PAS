@@ -30,7 +30,6 @@ repeat
     ShowTop;
     ShowRoom(r1);
     GetCommand;
-    read(roomf,r1);
   until GameIsOver=true;;
 if close_up_shop then halt;
 until false;
