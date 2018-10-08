@@ -16,10 +16,7 @@ var roomf:roomfile;
 {$I procs.i}
 
 begin
-if not OpenR(roomf) then begin
-  writeln('Room.dat missing!');
-  halt;
-  end;
+OpenR(roomf);
 OpenI(itemf);
 
 seek(roomf,1);

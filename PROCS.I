@@ -20,22 +20,22 @@ procedure move_item(source, target, num:string);
    makes sure that item remains as long as
    item_id_chars.  changes each room's item string.}
   var roomf:roomfile;
-      r1:room;
+      r:room;
   begin
   if not OpenR(roomf) then begin
     writeln('Room.dat not found!');
     halt;
     end;
   seek(roomf, loc_of_room(source));
-  read(roomf,r1);
+  read(roomf,r);
   shift(roomf, -1);
-  delete(r1.items,pos(num,r1.items),ITEM_ID_CHARS);
-  write(roomf,r1);
+  delete(r.items,pos(num,r.items),ITEM_ID_CHARS);
+  write(roomf,r);
   seek(roomf,loc_of_room(target));
-  read(roomf,r1);
+  read(roomf,r);
   shift(roomf, -1);
-  r1.items:=r1.items+num;
-  write(roomf,r1);
+  r.items:=r.items+num;
+  write(roomf,r);
   close(roomf);
 end;
 
@@ -201,7 +201,7 @@ end; {showroom}
 
 procedure inventory;
   var roomf:roomfile;
-      r1:room;
+      r:room;
       i1:item;
       s:string;
       i,j:integer;
@@ -211,8 +211,8 @@ procedure inventory;
     halt;
     end;
   seek(roomf,0);
-  read(roomf,r1);
-  if r1.items='' then begin
+  read(roomf,r);
+  if r.items='' then begin
     lastmessage:='You are holding nothing.';
     exit;
     end;
@@ -220,13 +220,13 @@ procedure inventory;
   ShowTop;
   textcolor(yellow);
   write('You currently are holding ');
-  if length(r1.items) div ITEM_ID_CHARS = 1 then
+  if length(r.items) div ITEM_ID_CHARS = 1 then
    writeln('one item:') else
-   writeln(length(r1.items) div ITEM_ID_CHARS,' items:');
+   writeln(length(r.items) div ITEM_ID_CHARS,' items:');
   textcolor(TEXTFG);
-  for i:=0 to (length(r1.items) div ITEM_ID_CHARS)-1 do begin
+  for i:=0 to (length(r.items) div ITEM_ID_CHARS)-1 do begin
     j:=i*ITEM_ID_CHARS+1;
-    s:=copy(r1.items,j,ITEM_ID_CHARS);
+    s:=copy(r.items,j,ITEM_ID_CHARS);
     seek(itemf, loc_of_item(s));
     read(itemf, i1);
     writeln('  ',i1.sdesc);

@@ -16,12 +16,18 @@ function OpenI(var f1:itemfile):boolean;
 end;
 
 function OpenR(var f1:roomfile):boolean;
+  var result: integer;
   begin
   assign(f1,'room.dat');
   {$I-}
     reset(f1);
   {$I+}
-  OpenR:=(IOResult=0);
+  result:=IOResult;
+  if result <> 0 then begin
+    writeln('Error ' + IntToStr(result) + ' when opening ROOM.DAT.');
+    halt;
+    end;
+  OpenR:=true;
 end;
 
 function strip_of_0s(x:string):string;
@@ -131,7 +137,7 @@ end;
 function room_has_item(roomname,itemname:string):string;
   {If room holds item, what is the item's id?}
   var roomf:roomfile;
-      r1:room;i1:item;
+      r:room;i1:item;
       i,j:integer; s:string;
   begin
   room_has_item:='-1';
@@ -140,11 +146,11 @@ function room_has_item(roomname,itemname:string):string;
     halt;
     end;
   seek(roomf,0);
-  repeat read(roomf, r1) until (r1.name=roomname) or (eof(roomf));
-  if (eof(roomf)) and (r1.name<>roomname) then exit;
-  for i:=0 to (length(r1.items) div ITEM_ID_CHARS) - 1 do begin
+  repeat read(roomf, r) until (r.name=roomname) or (eof(roomf));
+  if (eof(roomf)) and (r.name<>roomname) then exit;
+  for i:=0 to (length(r.items) div ITEM_ID_CHARS) - 1 do begin
     j:=i*ITEM_ID_CHARS+1;
-    s:=copy(r1.items,j,ITEM_ID_CHARS);
+    s:=copy(r.items,j,ITEM_ID_CHARS);
     seek(itemf,loc_of_item(s));
     read(itemf,i1);
     if i1.word=itemname then room_has_item:=pad_with_0s(i1.id);
