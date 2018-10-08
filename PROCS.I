@@ -126,7 +126,6 @@ end;
 procedure ReadOptions;
   var o1:options;
       o:optionsfile;
-      i:itemfile;
       i1:item;
       s:string;
   begin
@@ -138,14 +137,7 @@ procedure ReadOptions;
     worldname:='The Game';
     textbk:=black; textfg:=white;
     prompt:='> ';
-    if not OpenI(i) then item_id_chars:=2 else begin
-      seek(i,0);
-      item_id_chars:=2;
-      while not eof(i) do begin
-        read(i,i1);
-        if length(i1.id)>item_id_chars then item_id_chars:=length(s);
-        end;
-      end;
+    item_id_chars:=2;
     exit;
     end;
   seek(o,0);
@@ -176,12 +168,7 @@ procedure ShowRoom(r:room);
   var s:string;
       i:integer;
       i1:item;
-      itemf:itemfile;
   begin
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   writeln('You are ',r.sdesc);
   writeln;
   if r.ldesc1<>'' then writeln(r.ldesc1);
@@ -210,12 +197,10 @@ procedure ShowRoom(r:room);
       writeln('  ',i1.sdesc);
       end;
     end;
-    close(itemf);
 end; {showroom}
 
 procedure inventory;
   var roomf:roomfile;
-      itemf:itemfile;
       r1:room;
       i1:item;
       s:string;
@@ -223,10 +208,6 @@ procedure inventory;
   begin
   if not OpenR(roomf) then begin
     writeln('Room.dat not found!');
-    halt;
-    end;
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
     halt;
     end;
   seek(roomf,0);
@@ -256,19 +237,13 @@ procedure inventory;
   textcolor(TEXTFG);
   if readkey='a' then;
   close(roomf);
-  close(itemf);
 end;
 
 procedure look_at(x:string);
   var Done:boolean;
       i:integer;
       i1:item;
-      itemf:itemfile;
   begin
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   Done:=FALSE;
   i:=0;
   repeat
@@ -292,7 +267,6 @@ procedure look_at(x:string);
     writeln('  ',i1.ldesc);
     if readkey='a' then;
     end;
-  close(itemf);
 end;
 
 procedure get(x:string);
@@ -408,4 +382,3 @@ procedure GetCommand;
   lastmessage:='Woah!  Try ''help'' instead.';
   shift(roomf, -1);
 end;
-

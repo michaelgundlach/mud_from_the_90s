@@ -1,12 +1,18 @@
 procedure Showtop; forward;
 
 function OpenI(var f1:itemfile):boolean;
+  var result: integer;
   begin
   assign(f1,'item.dat');
   {$I-}
     reset(f1);
   {$I+}
-  OpenI:=(IOResult=0);
+  result:=IOResult;
+  if result <> 0 then begin
+    writeln('Error ' + IntToStr(result) + ' when opening ITEM.DAT.');
+    halt;
+    end;
+  OpenI:=true;
 end;
 
 function OpenR(var f1:roomfile):boolean;
@@ -97,24 +103,17 @@ function loc_of_item(x:string):integer;
   var i1:item;
       i,j:integer;
       s:string;
-      itemf:itemfile;
   begin
-  if not Openi(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   seek(itemf,0);
   while not eof(itemf) do begin
     read(itemf,i1);
     if strip_of_0s(i1.id)=strip_of_0s(x) then begin
       Loc_of_item:=filepos(itemf)-1;
-      close(itemf);
       exit;
       end;
     end;
   writeln('Item ',x,' not found!');
   readln;
-  close(itemf);
   exit;
 end;
 
@@ -131,17 +130,13 @@ end;
 
 function room_has_item(roomname,itemname:string):string;
   {If room holds item, what is the item's id?}
-  var roomf:roomfile; itemf:itemfile;
+  var roomf:roomfile;
       r1:room;i1:item;
       i,j:integer; s:string;
   begin
   room_has_item:='-1';
   if not OpenR(roomf) then begin
     writeln('Room.dat not found!');
-    halt;
-    end;
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
     halt;
     end;
   seek(roomf,0);
@@ -154,6 +149,5 @@ function room_has_item(roomname,itemname:string):string;
     read(itemf,i1);
     if i1.word=itemname then room_has_item:=pad_with_0s(i1.id);
     end;
-  close(roomf); close(itemf);
+  close(roomf);
 end;
-

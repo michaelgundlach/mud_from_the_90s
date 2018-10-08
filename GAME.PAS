@@ -1,7 +1,8 @@
-uses crt;
+uses crt, sysutils;
 {$I type.i}
 
 var roomf:roomfile;
+    itemf:itemfile;
     r1:room;
     lastmessage:string;
     worldname:string;
@@ -19,6 +20,8 @@ if not OpenR(roomf) then begin
   writeln('Room.dat missing!');
   halt;
   end;
+OpenI(itemf);
+
 seek(roomf,1);
 read(roomf,r1);
 ReadOptions;
@@ -35,4 +38,3 @@ repeat
 if close_up_shop then halt;
 until false;
 end.
-
