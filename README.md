@@ -32,6 +32,8 @@ instead of clearing it out every time when writing each new room.
 
 This gives me hope that ITEM.DAT may not be as corrupted as I thought.  It may be one byte off somewhere.  Not sure if it would be easier to find that byte, or to just reenter all the data in a new file.
 
+**Update**: ITEM.DAT was not corrupted, just not backward compatible.  Old Turbo Pascal stored bools as one byte and enums as one byte.  New Free Pascal seems to store them as 3 bytes and 4 bytes, and the docs warn against writing enums to disk in the first place (though does that mean a 'file of some_record_type' is not allowed to work with a record that contains an enum?)  By just writing a new item record to a blank file and comparing the layout with the existing item.dat using `od -c`, I found which bytes to add and remove to make Free Pascal happy.
+
 ## Running FP
 
 Seems to work best to run fp.exe from cmd.exe (not from Cygwin or a Desktop shortcut) starting in the directory with game.pas in it, then to set Options -> Directories -> Units to 
@@ -41,3 +43,4 @@ Seems to work best to run fp.exe from cmd.exe (not from Cygwin or a Desktop shor
     c:\program files\fpc\3.0.4\units\$fpctarget\rtl
 
 Doing anything but the above several steps means that it can't find crt; or I can't figure out where it's writing changes to files; or it crashes on every other run.
+
