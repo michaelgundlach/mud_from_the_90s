@@ -7,9 +7,9 @@ E=east
 W=west
 I=inventory
 get thing, drop thing, look at thing.
+[New in 2018] eat thing.
 Q=quit
 
 All lowercase, even for names, please.
 
 Happy exploring the 14 rooms.
-
