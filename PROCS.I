@@ -18,7 +18,7 @@ end;
 procedure move_item(source, target, num:string);
   {moves an item from one room to another.
    makes sure that item remains as long as
-   item_id_chars.  changes each room's item string.}
+   item_id_chars.  changes each room''s item string.}
   var r:room;
   begin
   seek(roomf, loc_of_room(source));
@@ -307,6 +307,49 @@ procedure drop(x:string);
   lastmessage:='You drop the '+x+'.';
 end;
 
+{BEGIN SECTION ADDED IN 2018 TO SUPPORT EATING.}
+function load_item_by_name(x:string):item;
+  var i1:item;
+  begin
+  seek(itemf, 0);
+  while not eof(itemf) do begin
+    read(itemf, i1);
+    if i1.word = x then begin
+      load_item_by_name := i1;
+      exit;
+      end;
+    end;
+  writeln('load_item_by_name(' + x + ') failed.');
+  halt;
+end;
+
+procedure eat(x:string);
+  var s:string;
+      i1:item;
+  begin
+  if (x='') or (x=' ') then begin
+    lastmessage:='Eat what?';
+    exit;
+    end;
+  if x[1]<>' ' then begin
+    lastmessage:='Woah!  Try ''help'' instead.';
+    exit;
+    end;
+  x:=copy(x,2,length(x));
+  s:=room_has_item('inv',x);
+  if s='-1' then begin
+    lastmessage:='There''s no '+x+' in your inventory.';
+    exit;
+    end;
+  i1 := load_item_by_name(x);
+  if i1.eat <> NO then begin
+    move_item('inv', 'stomach', s);
+    end;
+  { TODO: support DIE.  Maybe move the character to its own stomach? }
+  lastmessage:=i1.eatm;
+end;
+{END SECTION ADDED IN 2018 TO SUPPORT EATING.}
+
 procedure GetCommand;
   var s:string;
       c:char;
@@ -331,6 +374,11 @@ procedure GetCommand;
 
   if ucase(copy(s,1,4))='DROP' then begin
     drop(copy(s,5,length(s)));
+    exit;
+    end;
+
+  if ucase(copy(s,1,3))='EAT' then begin
+    eat(copy(s,4,length(s)));
     exit;
     end;
 
