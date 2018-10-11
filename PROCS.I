@@ -250,8 +250,10 @@ procedure look_at(x:string);
     end
   else begin
     lastmessage:='Press a key.';
-    ShowTop; ShowRoom(r1); writeln;
-    writeln(PROMPT);
+    {New in 2018: comment out some code.  Don''t redraw [thus flashing] the
+     screen needlessly, just show the desc.}
+    {ShowTop; ShowRoom(r1);} writeln;
+    {writeln(PROMPT);}
     writeln('  ',i1.ldesc);
     if readkey='a' then;
     end;
