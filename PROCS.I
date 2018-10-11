@@ -19,24 +19,18 @@ procedure move_item(source, target, num:string);
   {moves an item from one room to another.
    makes sure that item remains as long as
    item_id_chars.  changes each room's item string.}
-  var roomf:roomfile;
-      r1:room;
+  var r:room;
   begin
-  if not OpenR(roomf) then begin
-    writeln('Room.dat not found!');
-    halt;
-    end;
   seek(roomf, loc_of_room(source));
-  read(roomf,r1);
+  read(roomf,r);
   shift(roomf, -1);
-  delete(r1.items,pos(num,r1.items),ITEM_ID_CHARS);
-  write(roomf,r1);
+  delete(r.items,pos(num,r.items),ITEM_ID_CHARS);
+  write(roomf,r);
   seek(roomf,loc_of_room(target));
-  read(roomf,r1);
+  read(roomf,r);
   shift(roomf, -1);
-  r1.items:=r1.items+num;
-  write(roomf,r1);
-  close(roomf);
+  r.items:=r.items+num;
+  write(roomf,r);
 end;
 
 procedure Instructions;
@@ -126,7 +120,6 @@ end;
 procedure ReadOptions;
   var o1:options;
       o:optionsfile;
-      i:itemfile;
       i1:item;
       s:string;
   begin
@@ -138,14 +131,7 @@ procedure ReadOptions;
     worldname:='The Game';
     textbk:=black; textfg:=white;
     prompt:='> ';
-    if not OpenI(i) then item_id_chars:=2 else begin
-      seek(i,0);
-      item_id_chars:=2;
-      while not eof(i) do begin
-        read(i,i1);
-        if length(i1.id)>item_id_chars then item_id_chars:=length(s);
-        end;
-      end;
+    item_id_chars:=2;
     exit;
     end;
   seek(o,0);
@@ -176,12 +162,7 @@ procedure ShowRoom(r:room);
   var s:string;
       i:integer;
       i1:item;
-      itemf:itemfile;
   begin
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   writeln('You are ',r.sdesc);
   writeln;
   if r.ldesc1<>'' then writeln(r.ldesc1);
@@ -210,28 +191,17 @@ procedure ShowRoom(r:room);
       writeln('  ',i1.sdesc);
       end;
     end;
-    close(itemf);
 end; {showroom}
 
 procedure inventory;
-  var roomf:roomfile;
-      itemf:itemfile;
-      r1:room;
+  var r:room;
       i1:item;
       s:string;
       i,j:integer;
   begin
-  if not OpenR(roomf) then begin
-    writeln('Room.dat not found!');
-    halt;
-    end;
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   seek(roomf,0);
-  read(roomf,r1);
-  if r1.items='' then begin
+  read(roomf,r);
+  if r.items='' then begin
     lastmessage:='You are holding nothing.';
     exit;
     end;
@@ -239,13 +209,13 @@ procedure inventory;
   ShowTop;
   textcolor(yellow);
   write('You currently are holding ');
-  if length(r1.items) div ITEM_ID_CHARS = 1 then
+  if length(r.items) div ITEM_ID_CHARS = 1 then
    writeln('one item:') else
-   writeln(length(r1.items) div ITEM_ID_CHARS,' items:');
+   writeln(length(r.items) div ITEM_ID_CHARS,' items:');
   textcolor(TEXTFG);
-  for i:=0 to (length(r1.items) div ITEM_ID_CHARS)-1 do begin
+  for i:=0 to (length(r.items) div ITEM_ID_CHARS)-1 do begin
     j:=i*ITEM_ID_CHARS+1;
-    s:=copy(r1.items,j,ITEM_ID_CHARS);
+    s:=copy(r.items,j,ITEM_ID_CHARS);
     seek(itemf, loc_of_item(s));
     read(itemf, i1);
     writeln('  ',i1.sdesc);
@@ -255,20 +225,13 @@ procedure inventory;
   writeln('Press a key.');
   textcolor(TEXTFG);
   if readkey='a' then;
-  close(roomf);
-  close(itemf);
 end;
 
 procedure look_at(x:string);
   var Done:boolean;
       i:integer;
       i1:item;
-      itemf:itemfile;
   begin
-  if not OpenI(itemf) then begin
-    writeln('Item.dat not found!');
-    halt;
-    end;
   Done:=FALSE;
   i:=0;
   repeat
@@ -292,7 +255,6 @@ procedure look_at(x:string);
     writeln('  ',i1.ldesc);
     if readkey='a' then;
     end;
-  close(itemf);
 end;
 
 procedure get(x:string);
@@ -317,6 +279,8 @@ procedure get(x:string);
     exit;
     end;
   move_item(r1.name,'inv',s);
+  seek(roomf, loc_of_room(r1.name));
+  read(roomf, r1);
   lastmessage:='You pick up the '+x+'.';
 end;
 
@@ -338,6 +302,8 @@ procedure drop(x:string);
     exit;
     end;
   move_item('inv',r1.name,s);
+  seek(roomf, loc_of_room(r1.name));
+  read(roomf, r1);
   lastmessage:='You drop the '+x+'.';
 end;
 
@@ -349,63 +315,66 @@ procedure GetCommand;
   write(PROMPT);
   readln(s);
   if s='' then begin
-    shift(roomf, -1);
     exit;
     end
   else c:=s[1];
 
   if ucase(copy(s,1,8))='LOOK AT ' then begin
     look_at(copy(s,9,length(s)));
-    shift(roomf, -1);
     exit;
     end;
 
   if ucase(copy(s,1,3))='GET' then begin
     get(copy(s,4,length(s)));
-    shift(roomf, -1);
     exit;
     end;
 
   if ucase(copy(s,1,4))='DROP' then begin
     drop(copy(s,5,length(s)));
-    shift(roomf, -1);
     exit;
     end;
 
   case upcase(c) of
     'N':begin
-        if r1.n <> '0' then seek(roomf, loc_of_room(r1.n)) else shift(roomf, -1);
+        if r1.n <> '0' then begin
+          seek(roomf, loc_of_room(r1.n));
+          read(roomf, r1);
+          end;
         exit;
         end;
     'S':begin
-        if r1.s <> '0' then seek(roomf, loc_of_room(r1.s)) else shift(roomf, -1);
+        if r1.s <> '0' then begin
+          seek(roomf, loc_of_room(r1.s));
+          read(roomf, r1);
+          end;
         exit;
         end;
     'E':begin
-        if r1.e <> '0' then seek(roomf, loc_of_room(r1.e)) else shift(roomf, -1);
+        if r1.e <> '0' then begin
+          seek(roomf, loc_of_room(r1.e));
+          read(roomf, r1);
+          end;
         exit;
         end;
     'W':begin
-        if r1.w <> '0' then seek(roomf, loc_of_room(r1.w)) else shift(roomf, -1);
+        if r1.w <> '0' then begin
+          seek(roomf, loc_of_room(r1.w));
+          read(roomf, r1);
+          end;
         exit;
         end;
     'I':begin
         inventory;
-        shift(roomf,-1);
         exit;
         end;
     'H':begin
         Instructions;
-        shift(roomf, -1);
         exit;
         end;
     'Q':begin
         GameIsOver:=true;
-        shift(roomf, -1);
         exit;
         end;
     end;
   lastmessage:='Woah!  Try ''help'' instead.';
-  shift(roomf, -1);
 end;
-

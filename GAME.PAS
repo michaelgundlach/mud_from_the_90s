@@ -1,7 +1,8 @@
-uses crt;
+uses crt, sysutils;
 {$I type.i}
 
 var roomf:roomfile;
+    itemf:itemfile;
     r1:room;
     lastmessage:string;
     worldname:string;
@@ -15,10 +16,9 @@ var roomf:roomfile;
 {$I procs.i}
 
 begin
-if not OpenR(roomf) then begin
-  writeln('Room.dat missing!');
-  halt;
-  end;
+OpenR(roomf);
+OpenI(itemf);
+
 seek(roomf,1);
 read(roomf,r1);
 ReadOptions;
@@ -30,9 +30,7 @@ repeat
     ShowTop;
     ShowRoom(r1);
     GetCommand;
-    read(roomf,r1);
   until GameIsOver=true;;
 if close_up_shop then halt;
 until false;
 end.
-
