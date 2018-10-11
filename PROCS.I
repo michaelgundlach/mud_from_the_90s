@@ -345,7 +345,10 @@ procedure eat(x:string);
   if i1.eat <> NO then begin
     move_item('inv', 'stomach', s);
     end;
-  { TODO: support DIE.  Maybe move the character to its own stomach? }
+  if i1.eat = DIE then begin
+    seek(roomf, loc_of_room('death_by_poisoning'));
+    read(roomf, r1);
+    end;
   lastmessage:=i1.eatm;
 end;
 {END SECTION ADDED IN 2018 TO SUPPORT EATING.}
