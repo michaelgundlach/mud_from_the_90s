@@ -279,6 +279,8 @@ procedure get(x:string);
     exit;
     end;
   move_item(r1.name,'inv',s);
+  seek(roomf, loc_of_room(r1.name));
+  read(roomf, r1);
   lastmessage:='You pick up the '+x+'.';
 end;
 
@@ -300,6 +302,8 @@ procedure drop(x:string);
     exit;
     end;
   move_item('inv',r1.name,s);
+  seek(roomf, loc_of_room(r1.name));
+  read(roomf, r1);
   lastmessage:='You drop the '+x+'.';
 end;
 
