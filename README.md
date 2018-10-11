@@ -34,6 +34,8 @@ This gives me hope that ITEM.DAT may not be as corrupted as I thought.  It may b
 
 **Update**: ITEM.DAT was not corrupted, just not backward compatible.  Old Turbo Pascal stored bools as one byte and enums as one byte.  New Free Pascal seems to store them as 3 bytes and 4 bytes, and the docs warn against writing enums to disk in the first place (though does that mean a 'file of some_record_type' is not allowed to work with a record that contains an enum?)  By just writing a new item record to a blank file and comparing the layout with the existing item.dat using `od -c`, I found which bytes to add and remove to make Free Pascal happy.
 
+**Update 2**: oops and I had to adjust the length of each record by one byte for some reason.
+
 ## Running FP
 
 Seems to work best to run fp.exe from cmd.exe (not from Cygwin or a Desktop shortcut) starting in the directory with game.pas in it, then to set Options -> Directories -> Units to 
